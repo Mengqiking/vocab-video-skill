@@ -9,7 +9,7 @@ HEIGHT = BOTTOM - TOP
 
 def red_mask(rgb):
     r, g, b = rgb.astype(np.int16).transpose(2, 0, 1)
-    return (r > 102) & (r < 207) & (r - g > 56) & (r - b > 54) & (g < 138)
+    return (r > 102) & (r < 207) & (r - g > 56) & (r - b > 54) & (g < 138) & (np.abs(g - b) < 32)
 
 
 def groups(indices, gap=1):
