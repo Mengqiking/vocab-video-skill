@@ -47,6 +47,18 @@ def label_slot(active_rgb, reference, word):
     raise ValueError(f"{word} 高亮末行中心 {center} 附近没有居中的释义")
 
 
+def contains_stray_text(mask):
+    # 压缩色点可散布整行。用 24 像素窗口查找能构成字形的局部红点。
+    if mask.sum() <= 20:
+        return False
+    ys, xs = np.nonzero(mask)
+    for dy, dx in ((0, 0), (12, 0), (0, 12), (12, 12)):
+        bins = ((ys + dy) // 24) * 48 + (xs + dx) // 24
+        if np.bincount(bins).max() > 20:
+            return True
+    return False
+
+
 def decode(video, count, select=None):
     filters = [f"crop={WIDTH}:{HEIGHT}:0:{TOP}"]
     if select:
@@ -90,6 +102,6 @@ def verify_annotations(video, timings, story):
             if not valid:
                 raise ValueError(f"第 {n} 帧 {t['text']} 释义错位、提前或丢失")
             observed[region] = False
-        if observed.sum() > 20:
+        if contains_stray_text(observed):
             raise ValueError(f"第 {n} 帧出现区域外红字")
     return {"checkedFrames": story, "words": measurements}

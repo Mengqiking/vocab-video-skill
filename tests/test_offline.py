@@ -15,6 +15,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from build import prepare, read_lesson
+from annotation_qa import contains_stray_text
 from types import SimpleNamespace
 
 RATE = 48000
@@ -45,6 +46,13 @@ def fixture(directory, lesson):
 
 
 class OfflineTests(unittest.TestCase):
+    def test_stray_annotation_ignores_scattered_compression_speckles(self):
+        mask = np.zeros((784, 1080), dtype=bool)
+        mask[100, ::30] = True
+        self.assertFalse(contains_stray_text(mask))
+        mask[150:165, 145:147] = True
+        self.assertTrue(contains_stray_text(mask))
+
     def test_prepare_preserves_audio_outside_targets_and_shifts_frames(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
