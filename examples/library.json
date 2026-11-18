@@ -1,0 +1,97 @@
+{
+  "title": "图书馆的自习座位怎么订？",
+  "storySize": 39,
+  "words": [
+    {
+      "id": "w1",
+      "text": "study space",
+      "ipa": "ˈstʌdi speɪs",
+      "pos": "n.",
+      "meaning": "自习空间"
+    },
+    {
+      "id": "w2",
+      "text": "reserve",
+      "ipa": "rɪˈzɜːrv",
+      "pos": "v.",
+      "meaning": "预约"
+    },
+    {
+      "id": "w3",
+      "text": "availability",
+      "ipa": "əˌveɪləˈbɪləti",
+      "pos": "n.",
+      "meaning": "空位情况"
+    },
+    {
+      "id": "w4",
+      "text": "time slot",
+      "ipa": "taɪm slɑːt",
+      "pos": "n.",
+      "meaning": "时段"
+    },
+    {
+      "id": "w5",
+      "text": "check in",
+      "ipa": "tʃek ɪn",
+      "pos": "短语",
+      "meaning": "签到"
+    },
+    {
+      "id": "w6",
+      "text": "quiet zone",
+      "ipa": "ˈkwaɪət zoʊn",
+      "pos": "n.",
+      "meaning": "安静区"
+    },
+    {
+      "id": "w7",
+      "text": "capacity",
+      "ipa": "kəˈpæsəti",
+      "pos": "n.",
+      "meaning": "座位容量"
+    },
+    {
+      "id": "w8",
+      "text": "release",
+      "ipa": "rɪˈliːs",
+      "pos": "v.",
+      "meaning": "释放"
+    }
+  ],
+  "parts": [
+    "找",
+    {
+      "word": "w1"
+    },
+    "？要先",
+    {
+      "word": "w2"
+    },
+    "。周六我想和同学去图书馆，就上网查",
+    {
+      "word": "w3"
+    },
+    "。上午只剩一个",
+    {
+      "word": "w4"
+    },
+    "，我赶紧订下来。到门口先",
+    {
+      "word": "w5"
+    },
+    "，再沿着指示牌找到",
+    {
+      "word": "w6"
+    },
+    "。房间的",
+    {
+      "word": "w7"
+    },
+    "有限，临时去可能没位。后来我们改了时间，就把原来的座位",
+    {
+      "word": "w8"
+    },
+    "，这样临时想去自习的人也能订到。"
+  ]
+}

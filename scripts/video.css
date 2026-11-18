@@ -1,0 +1,44 @@
+* { box-sizing: border-box; }
+.video { background: #202220; color: #202220; font-family: "Helvetica Neue", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", Arial, sans-serif; }
+header { flex: 0 0 86px; display: grid; grid-template-columns: 220px minmax(0, 1fr) 220px; align-items: center; padding: 0 54px; color: #efefe7; font-size: 25px; font-weight: 600; }
+header .scene-title { color: #fffdf3; font-size: 38px; line-height: 1.08; text-align: center; overflow-wrap: anywhere; }
+header .exam-label { color: #f9da4a; text-align: right; white-space: nowrap; font-size: 31px; }
+main { flex: 1; min-height: 0; background: #faf8ef; border-top: 5px solid #f9da4a; }
+.story { display: flex; align-items: center; padding: 22px 53px 43px; }
+.passage { width: 100%; font-size: 37px; line-height: 2.22; font-weight: 680; line-break: strict; }
+.story .passage { text-align: justify; text-justify: inter-character; }
+.word-group, .word { display: inline-block; white-space: nowrap; }
+.word { position: relative; }
+mark { background: #f9da4a; color: inherit; padding: 0 .12em .03em; border-radius: 4px; }
+mark.speaking { background: #e9b82a; }
+.annotation { position: absolute; left: 50%; top: calc(50% + 22px); transform: translateX(-50%); color: #a2362f; font-size: 24.2px; line-height: 1.2; font-weight: 650; }
+footer { flex: 0 0 131px; display: flex; align-items: center; justify-content: space-between; padding: 10px 54px; color: #fffdf3; }
+.current-word { min-height: 76px; padding-left: 18px; border-left: 4px solid #f9da4a; }
+.current-word:not([data-active]) { border-color: transparent; }
+.current-word strong { display: block; font-size: 35px; line-height: 1.2; }
+.word-meta { display: flex; align-items: center; gap: 14px; margin-top: 6px; font-size: 23px; white-space: nowrap; }
+.word-meta span:last-child { color: #e1dac5; }
+.listening { flex: 0 0 auto; margin-left: 16px; text-align: right; }
+.progress { display: block; margin: 0 3px 4px 0; color: #e1dac5; font-size: 20px; font-variant-numeric: tabular-nums; }
+.waveform { display: block; }
+.review { padding: 30px 53px 22px; }
+h1 { display: inline-block; margin: 0 0 24px; padding: 7px 15px 8px; font-size: 35px; line-height: 1.25; border-radius: 4px; background: #f9da4a; }
+.recap { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.recap li { min-height: 79px; display: grid; grid-template-columns: 1.1fr 1.05fr .8fr; gap: 14px; align-items: center; padding: 0 17px; border-radius: 6px; border: 1px solid #e3ddca; background: #fffdf5; }
+.recap strong { font-size: 30px; line-height: 1.15; }
+.ipa { color: #474c42; font-size: 23px; line-height: 1.18; }
+.definition { color: #38372e; font-size: 24px; line-height: 1.18; }
+.quiz { font-size: 34px; line-height: 2.14; }
+.blank { display: inline-block; width: 1.7em; border-bottom: .09em solid #62583a; vertical-align: -.12em; }
+.hint { color: #51483d; font-size: .82em; }
+
+/* 手机大字版：正文靠左。 */
+.story { padding: 23px 49px 31px; }
+.story .passage { text-align: left; line-height: 89px; }
+.story .annotation { top: calc(50% + 25px); }
+
+/* 英文在空格处自然断行，词义跟在短语末尾，只显示一次。 */
+.flow-phrase mark { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.phrase-tail { position: relative; display: inline-block; white-space: nowrap; line-height: 1; }
+.phrase-tail .annotation { white-space: nowrap; }
+.exam-source { margin-left: auto; color: #e1dac5; font-size: 25px; }
