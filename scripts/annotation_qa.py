@@ -1,4 +1,5 @@
-"""从最终 MP4 检查每个朗读区间的高亮末行，以及正文每帧的释义。"""
+"""从最终 MP4 检查每个朗读区间的高亮末行，以及指定正文帧的释义。"""
+import math
 import subprocess
 import sys
 import numpy as np
@@ -79,7 +80,25 @@ def decode(video, count, select=None):
                 raise ValueError("逐帧解码失败")
 
 
-def verify_annotations(video, timings, story):
+def sampled_indices(timings, story):
+    points = {0, story - 1}
+    for item in timings:
+        start = item["revealFrame"]
+        stop = math.ceil(item["endSeconds"] * 30 - 1e-8)
+        points.update((start - 1, start, (start + stop) // 2, stop - 1, stop))
+    return sorted(n for n in points if 0 <= n < story)
+
+
+def verify_annotations(video, timings, story, mode="sampled"):
+    if mode == "sampled":
+        planned = sampled_indices(timings, story)
+        select = planned
+    elif mode == "full":
+        planned = range(story)
+        select = None
+    else:
+        raise ValueError(f"未知释义验收模式 {mode}")
+
     reveals = [t["revealFrame"] for t in timings]
     indices = sorted(set([*reveals, story - 1]))
     grabs = dict(zip(indices, list(decode(video, len(indices), indices)), strict=True))
@@ -90,7 +109,7 @@ def verify_annotations(video, timings, story):
         region, result = label_slot(grabs[t["revealFrame"]], reference, t["text"])
         slots.append(region)
         measurements.append(result)
-    for n, rgb in enumerate(decode(video, story)):
+    for n, rgb in zip(planned, decode(video, len(planned), select), strict=True):
         observed = red_mask(rgb)
         for t, region in zip(timings, slots, strict=True):
             actual = observed[region]
@@ -104,4 +123,7 @@ def verify_annotations(video, timings, story):
             observed[region] = False
         if contains_stray_text(observed):
             raise ValueError(f"第 {n} 帧出现区域外红字")
-    return {"checkedFrames": story, "words": measurements}
+    report = {"mode": mode, "checkedFrames": len(planned), "storyFrames": story, "words": measurements}
+    if mode == "sampled":
+        report["frameIndices"] = planned
+    return report

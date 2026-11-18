@@ -15,7 +15,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from build import prepare, read_lesson
-from annotation_qa import contains_stray_text
+from annotation_qa import contains_stray_text, sampled_indices, verify_annotations
 from types import SimpleNamespace
 
 RATE = 48000
@@ -46,6 +46,18 @@ def fixture(directory, lesson):
 
 
 class OfflineTests(unittest.TestCase):
+    def test_sampled_indices_clip_and_deduplicate(self):
+        timings = [{"revealFrame": 0, "endSeconds": 1 / 30},
+                   {"revealFrame": 1, "endSeconds": 6 / 30}]
+        self.assertEqual(sampled_indices(timings, 6), [0, 1, 3, 5])
+
+    def test_sampled_indices_cover_each_transition(self):
+        timings = [{"revealFrame": n, "endSeconds": (n + 10) / 30} for n in range(10, 151, 20)]
+        points = sampled_indices(timings, 200)
+        self.assertEqual(len(points), 42)
+        self.assertEqual(points[:6], [0, 9, 10, 15, 19, 20])
+        self.assertEqual(points[-1], 199)
+
     def test_stray_annotation_ignores_scattered_compression_speckles(self):
         mask = np.zeros((784, 1080), dtype=bool)
         mask[100, ::30] = True
@@ -98,6 +110,14 @@ class OfflineTests(unittest.TestCase):
                             "--audio", str(audio), "--boundaries", str(metadata),
                             "--output", str(out)], check=True)
             report = json.loads((out / "验收记录.json").read_text())
+            qa = report["annotationQA"]
+            self.assertEqual(qa["mode"], "sampled")
+            self.assertEqual(qa["checkedFrames"], 42)
+            self.assertEqual(len(set(qa["frameIndices"])), 42)
+            props = json.loads((out / "render-props.json").read_text())
+            full = verify_annotations(next(out.glob("*.mp4")), props["timings"], qa["storyFrames"], mode="full")
+            self.assertEqual(full["checkedFrames"], qa["storyFrames"])
+            self.assertEqual(qa["words"], full["words"])
             self.assertEqual(report["verifiedWords"], 8)
             self.assertEqual(report["recapRows"], 8)
             self.assertEqual(report["clozeBlanks"], 8)
@@ -116,9 +136,11 @@ class OfflineTests(unittest.TestCase):
             audio, metadata = fixture(root, lesson)
             out = root / "out"
             subprocess.run([sys.executable, str(ROOT / "scripts/build.py"), str(script),
-                            "--audio", str(audio), "--boundaries", str(metadata),
+                            "--qa-mode", "full", "--audio", str(audio), "--boundaries", str(metadata),
                             "--output", str(out)], check=True)
             qa = json.loads((out / "验收记录.json").read_text())["annotationQA"]
+            self.assertEqual(qa["mode"], "full")
+            self.assertEqual(qa["checkedFrames"], qa["storyFrames"])
             first = qa["words"][0]
             self.assertEqual(first["highlightLines"], 2)
             # 末行必须含多个英文词，避免退化为只测末词居中。

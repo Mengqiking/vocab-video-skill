@@ -104,6 +104,8 @@ def main():
     parser.add_argument("--tts-text", type=Path, help="可选的独立口播稿")
     parser.add_argument("--audio", type=Path, help="离线模式的原声")
     parser.add_argument("--boundaries", type=Path, help="离线原声对应的 WordBoundary JSONL")
+    parser.add_argument("--qa-mode", choices=("sampled", "full"), default="sampled",
+                        help="正文释义验收：日常抽查约 42 帧，模板或字体改动及错位排查选 full")
     args = parser.parse_args()
     if bool(args.audio) != bool(args.boundaries) or (args.audio and args.tts_text):
         parser.error("--audio 和 --boundaries 必须一起提供，且不能和 --tts-text 同用")
@@ -123,7 +125,7 @@ def main():
         ffmpeg("-loglevel", "error", "-i", frames[0][1], "-vf",
                "pad=1080:1440:0:180:0xf9f6ec", "-frames:v", 1, "-q:v", 2, folder/"封面.jpg")
         assemble({"folder": str(folder), "frames": frames}, work)
-        report = verify(folder, pcm, sections)
+        report = verify(folder, pcm, sections, qa_mode=args.qa_mode)
         write_json(folder / "验收记录.json", report)
         for _, frame in frames:
             Path(frame).unlink()

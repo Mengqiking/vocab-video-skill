@@ -25,6 +25,16 @@ python scripts/build.py examples/library.json --output out/library
 
 `lesson.json` 以 [原创示例](examples/library.json) 为格式参考。将八个目标项各写一次，由 `parts` 内的 `{"word":"w1"}` 等引用，并与词表顺序一致。标题和画面文字使用简体，英文保留原文。用 `--tts-text` 单独传入同文意、同英文顺序的 UTF-8 口播稿。
 
+## 释义验收模式
+
+日常制片沿用上面的命令，默认按八个词的朗读边界和中点，加上正文首尾，通常检查 42 帧。更改模板、字体或排查错位时运行：
+
+```sh
+python scripts/build.py examples/library.json --output out/layout-check --qa-mode full
+```
+
+`验收记录.json` 的 `annotationQA` 包含模式、实际检查帧数和正文总帧数。抽查模式列出所查帧号，边界重合时实际帧数会少于 42。两种模式均检查音轨、复习卡及完整解码。
+
 ## 导入本地音轨
 
 ```sh
@@ -45,4 +55,4 @@ VOCAB_RENDER_TEST=1 python -m unittest discover -s tests -v
 
 本仓库自有代码按 MIT 授权。安装的 Remotion、Edge TTS 等依赖适用各自条款。在线合成会把口播稿提交给 Edge TTS 服务。 [Remotion 授权](https://www.remotion.dev/docs/license/pricing) · [Edge TTS 上游](https://github.com/rany2/edge-tts)
 
-[画面尺寸、字体规格、跨行示例的验收要求与错位复盘](references/画面与逐帧验收.md)记录了模板的视觉标准。开启完整离线测试会同时渲染普通示例和跨行示例，并逐帧验证成片。
+[画面尺寸、字体规格、跨行示例的验收要求与错位复盘](references/画面与逐帧验收.md)记录了模板的视觉标准。开启完整离线测试会同时渲染普通示例和跨行示例，并验证日常抽查与逐帧模式。

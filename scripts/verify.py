@@ -82,7 +82,7 @@ def count_quiz_blanks(video, start_frame):
     return len(lines)
 
 
-def verify(folder, source_pcm, sections):
+def verify(folder, source_pcm, sections, qa_mode="sampled"):
     lesson = read_json(folder/"lesson.json")
     props = read_json(folder/"render-props.json")
     timeline = read_json(folder/"timeline.json")
@@ -175,7 +175,7 @@ def verify(folder, source_pcm, sections):
         require(np.mean(np.abs(grabs[a][crop].astype(np.int16)-grabs[b][crop])) < 1, "复习卡没有完整停留")
     run(["ffmpeg", "-nostdin", "-v", "error", "-xerror", "-i", str(video), "-f", "null", "-"])
     return {
-        "annotationQA": verify_annotations(video, timings, story),
+        "annotationQA": verify_annotations(video, timings, story, mode=qa_mode),
         "title": title, "rows": rows, "durationSeconds": (story + 150) / 30,
         "verifiedWords": len(timings), "recapRows": recap_rows, "clozeBlanks": blanks,
         "englishTempoByPhrase": [(end-begin)/(new_end-new_begin) for begin,end,new_begin,new_end in sections],
