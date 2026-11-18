@@ -13,7 +13,7 @@ main { flex: 1; min-height: 0; background: #faf8ef; border-top: 5px solid #f9da4
 .story mark[data-measured] { white-space: nowrap; }
 mark { background: #f9da4a; color: inherit; padding: 0 .12em .03em; border-radius: 4px; }
 mark.speaking { background: #e9b82a; }
-.annotation { position: absolute; left: 50%; top: calc(100% + 1px); transform: translateX(-50%); color: #a2362f; font: 600 26.62px/32px "PingFang SC", "Noto Sans CJK SC", sans-serif; white-space: nowrap; }
+.annotation { position: absolute; left: 50%; top: calc(100% + var(--annotation-offset, 1px)); transform: translateX(-50%); color: #a2362f; font: 600 26.62px/32px "PingFang SC", "Noto Sans CJK SC", sans-serif; white-space: nowrap; }
 footer { flex: 0 0 131px; display: flex; align-items: center; justify-content: space-between; padding: 10px 54px; color: #fffdf3; }
 .current-word { min-height: 76px; padding-left: 18px; border-left: 4px solid #f9da4a; }
 .current-word:not([data-active]) { border-color: transparent; }

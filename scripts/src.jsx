@@ -108,7 +108,7 @@ function Review({lesson, quiz}) {
   );
 }
 
-function Video({lesson, narrationSeconds, timings, peaks, visualFrame, separateWave = false}) {
+function Video({lesson, narrationSeconds, timings, peaks, visualFrame, separateWave = false, annotationOffset = 1}) {
   const currentFrame = useCurrentFrame();
   const frame = visualFrame ?? currentFrame;
   const storyFrames = Math.ceil(narrationSeconds * fps);
@@ -122,7 +122,7 @@ function Video({lesson, narrationSeconds, timings, peaks, visualFrame, separateW
   const quiz = frame >= storyFrames + cardFrames;
 
   return (
-    <AbsoluteFill className="video">
+    <AbsoluteFill className="video" style={{"--annotation-offset": `${annotationOffset}px`}}>
       <header>
         <span className="brand">情景<br/>记单词</span>
         <strong className="scene-title" style={{fontSize: Math.max(54, Math.min(64, 744 / Array.from(lesson.title).length))}}>{lesson.title}</strong>

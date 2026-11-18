@@ -23,7 +23,7 @@ try {
     changes.add(Math.ceil(item.endSeconds * 30 - 1e-8));
   }
   const frames = [...changes].sort((a, b) => a - b).map(frame => ({ scene: 0, frame }));
-  const options = { serveUrl, inputProps: { scenes: [props], frames }, puppeteerInstance: browser };
+  const options = { serveUrl, inputProps: { scenes: [{ ...props, annotationOffset: process.platform === "linux" ? -1 : 1 }], frames }, puppeteerInstance: browser };
   const composition = await selectComposition({ ...options, id: "PackedFrames" });
   await renderFrames({
     ...options, composition, outputDir: null, imageFormat: "jpeg", jpegQuality: 92,
