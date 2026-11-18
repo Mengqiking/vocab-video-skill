@@ -1,5 +1,5 @@
-import React from "react";
-import {AbsoluteFill, Composition, registerRoot, useCurrentFrame} from "remotion";
+import React, {useLayoutEffect, useRef, useState} from "react";
+import {AbsoluteFill, Composition, continueRender, delayRender, registerRoot, useCurrentFrame} from "remotion";
 import "./video.css";
 
 const fps = 30;
@@ -7,9 +7,36 @@ const cardFrames = 75;
 
 function Passage({lesson, revealed, speakingId, storySize, quiz = false}) {
   const wordMap = new Map(lesson.words.map(word => [word.id, word]));
+  const passage = useRef(null);
+  const [lines, setLines] = useState(null);
+  const [handle] = useState(() => quiz ? null : delayRender("测量英文断行"));
+  useLayoutEffect(() => {
+    if (quiz) return;
+    if (lines) {
+      continueRender(handle);
+      return;
+    }
+    let active = true;
+    document.fonts.ready.then(() => {
+      if (!active) return;
+      const fragments = {};
+      for (const mark of passage.current.querySelectorAll("mark")) {
+        const groups = [];
+        let previousTop;
+        for (const token of mark.querySelectorAll("[data-token]")) {
+          if (token.offsetTop !== previousTop) groups.push([]);
+          groups.at(-1).push(token.textContent);
+          previousTop = token.offsetTop;
+        }
+        fragments[mark.parentElement.dataset.word] = groups.map(group => group.join(" "));
+      }
+      setLines(fragments);
+    });
+    return () => { active = false; };
+  }, [quiz, lines, handle]);
   let punctuation = "";
   return (
-    <div className={quiz ? "passage quiz" : "passage"} lang="zh-CN"
+    <div ref={passage} className={quiz ? "passage quiz" : "passage"} lang="zh-CN"
       style={quiz ? undefined : {fontSize: storySize}}>
       {lesson.parts.map((part, index) => {
         if (typeof part === "string") {
@@ -20,18 +47,20 @@ function Passage({lesson, revealed, speakingId, storySize, quiz = false}) {
         const word = wordMap.get(part.word);
         punctuation = lesson.parts[index + 1]?.match(/^[，。！？；、]/)?.[0] ?? "";
         if (!quiz) {
-          const split = word.text.lastIndexOf(" ");
-          const head = split < 0 ? "" : word.text.slice(0, split + 1);
-          const tail = word.text.slice(split + 1);
+          const chunks = lines?.[word.id] ?? [word.text];
           return (
             <span className="flow-phrase" key={word.id} data-word={word.id}>
-              <mark lang="en-US" className={word.id === speakingId ? "speaking" : undefined}>
-                {head}<span className="phrase-tail">{tail}
-                  <span className="annotation" style={{visibility: revealed.has(word.id) ? "visible" : "hidden"}}>
-                    {word.meaning}
-                  </span>
-                </span>
-              </mark>{punctuation}
+              {chunks.map((chunk, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && <br />}
+                  <mark lang="en-US" data-measured={lines ? true : undefined}
+                    className={word.id === speakingId ? "speaking" : undefined}>{lines ? chunk : chunk.split(/\s+/).map((token, j) => (
+                      <React.Fragment key={j}>{j > 0 && " "}<span data-token>{token}</span></React.Fragment>
+                    ))}{lines && i === chunks.length - 1 && (
+                    <span className="annotation" style={{visibility: revealed.has(word.id) ? "visible" : "hidden"}}>{word.meaning}</span>
+                  )}</mark>
+                </React.Fragment>
+              ))}{punctuation}
             </span>
           );
         }
@@ -64,7 +93,7 @@ function Review({lesson, quiz}) {
   return (
     <>
       <h1>{quiz ? "完形填空" : "单词汇总"}</h1>
-      {quiz ? <Passage lesson={lesson} quiz /> : (
+      {quiz ? <Passage key="quiz" lesson={lesson} quiz /> : (
         <ol className="recap">
           {lesson.words.map(word => (
             <li key={word.id}>
@@ -95,12 +124,12 @@ function Video({lesson, narrationSeconds, timings, peaks, visualFrame, separateW
   return (
     <AbsoluteFill className="video">
       <header>
-        <span>情境记单词</span>
-        <strong className="scene-title">{lesson.title}</strong>
-        <span className="exam-label">四级/六级/雅思</span>
+        <span className="brand">情景<br/>记单词</span>
+        <strong className="scene-title" style={{fontSize: Math.max(54, Math.min(64, 744 / Array.from(lesson.title).length))}}>{lesson.title}</strong>
+        <span className="exam-label">四级<br/>六级<br/>雅思</span>
       </header>
       <main className={reading ? "story" : "review"}>
-        {reading ? <Passage lesson={lesson} revealed={revealed} speakingId={speakingId} storySize={lesson.storySize ?? 37} /> : <Review lesson={lesson} quiz={quiz} />}
+        {reading ? <Passage lesson={lesson} revealed={revealed} speakingId={speakingId} storySize={lesson.storySize ?? 39} /> : <Review lesson={lesson} quiz={quiz} />}
       </main>
       <footer>
         {!reading && lesson.sourceLabel && <div className="exam-source">{lesson.sourceLabel}</div>}

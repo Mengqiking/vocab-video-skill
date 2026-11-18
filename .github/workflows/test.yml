@@ -16,7 +16,7 @@ jobs:
           cache: npm
       - run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-noto-cjk
+          sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-arphic-ukai
           python -m pip install -r requirements.txt
           npm ci
       - run: |

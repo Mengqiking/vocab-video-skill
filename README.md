@@ -44,3 +44,5 @@ VOCAB_RENDER_TEST=1 python -m unittest discover -s tests -v
 测试现场生成短音频和词边界，不依赖在线配音。第一条命令覆盖局部变速、区间外采样一致性、时间轴移动和错配拦截。第二条额外跑完整的本地渲染和验收。验收报告记录文件哈希和实测速率。发音和手机阅读体验以人工抽听、抽看为准。
 
 本仓库自有代码按 MIT 授权。安装的 Remotion、Edge TTS 等依赖适用各自条款。在线合成会把口播稿提交给 Edge TTS 服务。 [Remotion 授权](https://www.remotion.dev/docs/license/pricing) · [Edge TTS 上游](https://github.com/rany2/edge-tts)
+
+[画面尺寸、字体规格、跨行示例的验收要求与错位复盘](references/画面与逐帧验收.md)记录了模板的视觉标准。开启完整离线测试会同时渲染普通示例和跨行示例，并逐帧验证成片。

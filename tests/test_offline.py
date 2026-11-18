@@ -95,3 +95,25 @@ class OfflineTests(unittest.TestCase):
             self.assertEqual(report["clozeBlanks"], 8)
             self.assertTrue(report["unchangedOutsideEnglish"])
             self.assertEqual(len(list(out.glob("*.mp4"))), 1)
+
+    @unittest.skipUnless(os.environ.get("VOCAB_RENDER_TEST") == "1", "显式启用完整渲染检查")
+    def test_wrapped_phrase_centers_under_last_line(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            lesson = json.loads((ROOT / "examples/library.json").read_text())
+            lesson["parts"][0] = "为了赶上周末的读书会我提前到图书馆去预订"
+            lesson["words"][0]["text"] = "shared library study space"
+            script = root / "wrap.json"
+            script.write_text(json.dumps(lesson, ensure_ascii=False))
+            audio, metadata = fixture(root, lesson)
+            out = root / "out"
+            subprocess.run([sys.executable, str(ROOT / "scripts/build.py"), str(script),
+                            "--audio", str(audio), "--boundaries", str(metadata),
+                            "--output", str(out)], check=True)
+            qa = json.loads((out / "验收记录.json").read_text())["annotationQA"]
+            first = qa["words"][0]
+            self.assertEqual(first["highlightLines"], 2)
+            # 末行必须含多个英文词，避免退化为只测末词居中。
+            self.assertGreater(first["lastLineWidthPx"], 160)
+            self.assertLessEqual(first["centerErrorPx"], 2)
+            self.assertGreater(qa["checkedFrames"], 200)

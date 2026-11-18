@@ -6,6 +6,7 @@ import wave
 import numpy as np
 from PIL import Image
 from audio_base import align
+from annotation_qa import verify_annotations
 import hashlib
 
 
@@ -39,19 +40,19 @@ def frames(video, indexes):
 
 
 def red_mask(frame):
-    body = frame[24:234, 9:261].astype(np.int16)
+    body = frame[42:234, 9:261].astype(np.int16)
     r,g,b=body.transpose(2,0,1)
     return (r>g+32) & (r>b+23) & (g<140) & (r<220)
 
 
 def active_count(frame):
-    body = frame[24:234, 9:261]
+    body = frame[42:234, 9:261]
     r,g,b=body.transpose(2,0,1)
     return int(np.count_nonzero((r>213) & (g>145) & (g<198) & (b<83)))
 
 
 def body_rows(frame):
-    ink=np.max(frame[26:231,9:261], axis=2)<113
+    ink=np.max(frame[43:231,9:261], axis=2)<113
     rows=np.where(np.count_nonzero(ink,axis=1)>6)[0]
     groups=np.split(rows, np.where(np.diff(rows)>7)[0]+1)
     xs=np.where(np.any(ink[groups[-1][0]:groups[-1][-1]+1],axis=0))[0]
@@ -61,14 +62,14 @@ def body_rows(frame):
 def count_recap_rows(frame):
     ink = np.max(frame[:, 17:104], axis=2) < 105
     # Each row occupies one 79px card, even when the English text wraps.
-    return sum(int(np.count_nonzero(ink[(202+i*85)//4:(277+i*85)//4]) >= 20) for i in range(8))
+    return sum(int(np.count_nonzero(ink[(267+i*85)//4:(342+i*85)//4]) >= 20) for i in range(8))
 
 
 def count_quiz_blanks(video, start_frame):
     data = run(["ffmpeg", "-v", "error", "-xerror", "-ss", f"{(start_frame+2)/30:.6f}",
                 "-i", str(video), "-frames:v", "1", "-f", "rawvideo", "-pix_fmt", "rgb24", "-"])
     frame = np.frombuffer(data, dtype=np.uint8).reshape(1080, 1080, 3)
-    mask = np.max(frame[185:934, 45:1038], axis=2) < 160
+    mask = np.max(frame[263:942, 45:1038], axis=2) < 160
     lines = []
     for y, row in enumerate(mask):
         xs = np.flatnonzero(row)
@@ -174,6 +175,7 @@ def verify(folder, source_pcm, sections):
         require(np.mean(np.abs(grabs[a][crop].astype(np.int16)-grabs[b][crop])) < 1, "复习卡没有完整停留")
     run(["ffmpeg", "-nostdin", "-v", "error", "-xerror", "-i", str(video), "-f", "null", "-"])
     return {
+        "annotationQA": verify_annotations(video, timings, story),
         "title": title, "rows": rows, "durationSeconds": (story + 150) / 30,
         "verifiedWords": len(timings), "recapRows": recap_rows, "clozeBlanks": blanks,
         "englishTempoByPhrase": [(end-begin)/(new_end-new_begin) for begin,end,new_begin,new_end in sections],
